@@ -18,7 +18,7 @@ module Riemann
             
     def self.included(base)
       
-      base.include Riemann::Tools
+      base.send :include, Riemann::Tools
 
       require 'fog'
       require 'time'
