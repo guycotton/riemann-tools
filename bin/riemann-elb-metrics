@@ -62,11 +62,13 @@ class Riemann::Tools::RDSMetrics
         ttl: 60,
         description: "#{metric.opts[:lb]} #{metric.name} #{metric.stat_type} (#{metric.unit})",
         tags: [ "production", "elb_metrics" ],
+        time: metric.timestamp,
         metric: metric.value
     }
   end
   
   def tick  
+    next_time_block
     options[:elbs].each do |lb|
       options[:aws_azs].each do |az|
         dimensions = { "LoadBalancerName"=> lb } 

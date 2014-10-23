@@ -40,6 +40,7 @@ class Riemann::Tools::RDSMetrics
   end
   
   def tick
+    next_time_block
     options[:cluster_ids].each do |cluster_id|
       response = elasticache_connection.describe_cache_clusters(cluster_id, show_node_info: true)
       # should only run once

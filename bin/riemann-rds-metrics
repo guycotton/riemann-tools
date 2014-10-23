@@ -90,6 +90,7 @@ class Riemann::Tools::RDSMetrics
   end
   
   def tick  
+    next_time_block
     options[:db_instance_ids].each do |db_instance_id|
       send_metrics :dimensions => { "DBInstanceIdentifier" => db_instance_id }        
     end

@@ -30,6 +30,7 @@ module Riemann
         opt :aws_secret, "AWS Secret Key", :type => String
         opt :aws_region, "AWS Region", :type => String, :default => "eu-west-1"
         opt :include_metrics, "Only query these metrics", :type => :strings
+        opt :delay, "Query this many seconds behind", :type => Integer, :default => 60
   
         def metrics(metrics)
          @all_metrics=metrics        
@@ -62,16 +63,24 @@ module Riemann
     def selected_metrics
       self.class.all_metrics.select {|k,v| options[:include_metrics].nil? || options[:include_metrics].include?(k) }
     end
+    
+    def next_time_block
+      now = Time.now.utc
+      @start_time = @end_time.nil? ? (now - options[:interval] - options[:delay]) : @end_time
+      @end_time = now - options[:delay]
+    end
   
     def metric_base
       # every options[:interval] seconds, collect options[:interval] seconds worth of data
-      start_time = (Time.now.utc - options[:interval]).iso8601
-      end_time = Time.now.utc.iso8601
+            
+      # start_time = (Time.now.utc - options[:interval]).iso8601
+      # end_time = Time.now.utc.iso8601      
+      
       # The base query that all metrics would get
       {
         "Namespace" => self.class.namespace,
-        "StartTime" => start_time,
-        "EndTime" => end_time,
+        "StartTime" => @start_time.iso8601,
+        "EndTime" => @end_time.iso8601,
         "Period" => 60,
       }
     end
@@ -134,8 +143,9 @@ module Riemann
             
             metric = CloudWatchMetric.new metric_type, dimensions(opts), stat_type, timestamp, metric_value, (opts[:opts] || {})
             event = instance_exec(metric, &self.class.riemann_event) 
-              
-            report(event)
+            
+            puts "#{event.inspect}"  
+            #report(event)
           end
         end
       end
