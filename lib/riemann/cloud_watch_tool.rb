@@ -144,8 +144,8 @@ module Riemann
             metric = CloudWatchMetric.new metric_type, dimensions(opts), stat_type, timestamp, metric_value, (opts[:opts] || {})
             event = instance_exec(metric, &self.class.riemann_event) 
             
-            puts "#{event.inspect}"  
-            #report(event)
+            #puts "#{event.inspect}"  
+            report(event)
           end
         end
       end
